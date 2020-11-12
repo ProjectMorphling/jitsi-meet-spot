@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { withTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 
 import {
     getConfiguredMeetingDomain,
@@ -45,6 +46,8 @@ class WaitingForCallView extends React.Component {
         _onJoinScheduledMeeting: PropTypes.func,
         domain: PropTypes.string,
         events: PropTypes.array,
+        history: PropTypes.object,
+        location: PropTypes.object,
         t: PropTypes.func,
         tenant: PropTypes.string,
         wiredScreensharingEnabled: PropTypes.bool
@@ -72,6 +75,21 @@ class WaitingForCallView extends React.Component {
         this._onSetInputActive = this._onSetInputActive.bind(this);
         this._onSetScreenshareSelectActive
             = this._onSetScreenshareSelectActive.bind(this);
+    }
+
+    /**
+     * Maybe join a meeting.
+     *
+     * @inheritdoc
+     */
+    componentDidMount() {
+        const queryParams = new URLSearchParams(this.props.location.search);
+        const goToMeetingParam = queryParams.get('goToMeeting');
+
+        if (goToMeetingParam) {
+            this.props._onJoinAdHocMeeting(decodeURIComponent(goToMeetingParam));
+            this.props.history.replace(this.props.location.pathname);
+        }
     }
 
     /**
@@ -295,6 +313,8 @@ function mapDispatchToProps(dispatch) {
     };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(
-    withTranslation()(WaitingForCallView)
+export default withRouter(
+    connect(mapStateToProps, mapDispatchToProps)(
+        withTranslation()(WaitingForCallView)
+    )
 );

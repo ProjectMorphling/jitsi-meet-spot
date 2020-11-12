@@ -316,9 +316,19 @@ export class JoinCodeEntry extends React.Component {
 
                 this.setState({ validating: false });
 
-                const redirectTo = this._isInShareModeEnv() ? ROUTES.SHARE : ROUTES.REMOTE_CONTROL;
+                if (this._isInShareModeEnv()) {
+                    this.props.history.push(ROUTES.SHARE);
+                } else {
+                    let redirect = ROUTES.REMOTE_CONTROL;
+                    const queryParams = new URLSearchParams(this.props.location.search);
+                    const goToMeetingParam = queryParams.get('goToMeeting');
 
-                this.props.history.push(redirectTo);
+                    if (goToMeetingParam) {
+                        redirect += `?goToMeeting=${goToMeetingParam}`;
+                    }
+
+                    this.props.history.push(redirect);
+                }
             })
             .catch(error => {
                 logger.error('Failed to connect to Spot TV', {
